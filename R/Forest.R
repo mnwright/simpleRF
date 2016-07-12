@@ -1,0 +1,79 @@
+
+##' @title Forest class
+##' @description Virtual class for Random forest. 
+##' Contains all fields and methods used in all Forest subclasses.
+##' @importFrom parallel mclapply
+##' @import methods
+Forest <- setRefClass("Forest", 
+  fields = list(
+    num_trees = "integer", 
+    mtry = "integer", 
+    min_node_size = "integer", 
+    splitrule = "character",
+    data = "Data",
+    predict_data = "Data",
+    formula = "formula",
+    trees = "list",
+    treetype = "character",
+    replace = "logical"),
+  methods = list(
+    
+    grow = function() { 
+      
+      ## Init trees
+      temp <- lapply(trees, function(x) {
+        x$mtry <- mtry
+        x$min_node_size <- min_node_size
+        x$splitrule <- splitrule
+        x$data <- data
+      })
+      
+      ## Grow trees
+      ## TODO: Use mclapply (parallel package). Use a parameter to enable/disable because debugging is hard with mclapply.
+      trees <<- lapply(trees, function(x) {
+        x$grow(replace)
+        x
+      })
+    }, 
+    
+    predict = function(newdata) {
+      model.data <- model.frame(formula, newdata)
+      model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
+      predict_data <<- Data$new(data = model.data)
+      
+      ## Predict in trees
+      predictions <- simplify2array(lapply(trees, function(x) {
+        x$predict(predict_data)
+      }))
+      
+      ## Aggregate predictions
+      return(aggregatePredictions(predictions))
+    }, 
+    
+    aggregatePredictions = function(predictions) {
+      ## Empty virtual function
+    }, 
+    
+    predictionError = function() {
+      ## Empty virtual function
+    },
+    
+    show = function() {
+      cat("simpleRF Forest\n")
+      cat("Type:                            ", treetype, "\n")
+      cat("Splitrule:                       ", splitrule, "\n")
+      cat("Number of trees:                 ", num_trees, "\n")
+      cat("Sample size:                     ", data$nrow, "\n")
+      cat("Number of independent variables: ", data$ncol-1, "\n")
+      cat("Mtry:                            ", mtry, "\n")
+      cat("Target node size:                ", min_node_size, "\n")
+      cat("Replace                          ", replace, "\n")
+      cat("OOB prediction error:            ", predictionError(), "\n")
+    }, 
+    
+    print = function() {
+      show()
+    })
+)
+
+
