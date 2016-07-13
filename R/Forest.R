@@ -26,6 +26,7 @@ Forest <- setRefClass("Forest",
         x$mtry <- mtry
         x$min_node_size <- min_node_size
         x$splitrule <- splitrule
+        x$unordered_factors <- unordered_factors
         x$data <- data
       })
       
@@ -39,6 +40,7 @@ Forest <- setRefClass("Forest",
     
     predict = function(newdata) {
       model.data <- model.frame(formula, newdata)
+      ## TODO: Handle unordered splitting
       model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
       predict_data <<- Data$new(data = model.data)
       

@@ -24,11 +24,13 @@ TreeClassification <- setRefClass("TreeClassification",
     }, 
     
     findBestSplit = function(nodeID, possible_split_varIDs) {
-      
       ## Initialize
-      best_decrease <- -1;
-      best_varID <- -1;
-      best_value <- -1;
+      best_split <- NULL
+      best_split$decrease <- -1;
+      best_split$varID <- -1;
+      best_split$value <- -1;
+      
+      ## Get response
       response <- data$subset(sampleIDs[[nodeID]], 1)
       
       ## For all possible variables
@@ -36,47 +38,78 @@ TreeClassification <- setRefClass("TreeClassification",
         split_varID <- possible_split_varIDs[i]
         data_values <- data$subset(sampleIDs[[nodeID]], split_varID)
         
-        ## For all possible splits
-        possible_split_values <- unique(data_values)
-        for (j in 1:length(possible_split_values)) {
-          split_value <- possible_split_values[j]
-          
-          ## TODO: Handle unordered factors
-          ## Count classes in childs
-          idx <- data_values <= split_value
-          class_counts_left <- tabulate(response[idx])
-          class_counts_right <- tabulate(response[!idx])
-          
-          ## Skip if one child empty
-          if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
-            next
-          }
-          
-          ## TODO: Use splitrule parameter
-          ## Decrease of impurity
-          decrease <- sum(class_counts_left^2)/sum(class_counts_left) + 
-            sum(class_counts_right^2)/sum(class_counts_right)
-          
-          ## Use this split if better than before
-          if (decrease > best_decrease) {
-            best_value <- split_value
-            best_varID <- split_varID
-            best_decrease <- decrease
-          }
+        ## Handle ordered factors
+        if (!is.ordered(data_values)) {
+          if (unordered_factors %in% c("ignore", "order_once")) {
+            data_values <- as.ordered(data_values)
+          } else if (unordered_factors == "order_split") {
+            ## TODO: Order!
+            data_values <- as.ordered(data_values)
+          } 
+        }
+        
+        ## If still not ordered, use partition splitting
+        if (!is.ordered(data_values)) {
+          best_split = findBestSplitValuePartition(data_values, best_split)
+        } else {
+          best_split = findBestSplitValueOrdered(data_values, best_split)
         }
       }
       
-      if (best_varID < 0) {
+      if (best_split$varID < 0) {
         ## Stop if no good split found
         return(NULL)
       } else {
         ## Return best split
         result <- NULL
-        result$varID <- as.integer(best_varID)
-        result$value <- best_value
+        result$varID <- as.integer(best_split$varID)
+        result$value <- best_split$value
         return(result)
       }      
     }, 
+    
+    findBestSplitValueOrdered = function(data_values, best_split) {
+      ## Convert to numeric if necessary
+      if(!is.numeric(data_values)) {
+        data_values <- as.numeric(data_values)
+      }
+
+      ## For all possible splits
+      possible_split_values <- unique(data_values)
+      for (j in 1:length(possible_split_values)) {
+        split_value <- possible_split_values[j]
+        
+        ## Count classes in childs
+        idx <- data_values <= split_value
+        class_counts_left <- tabulate(response[idx])
+        class_counts_right <- tabulate(response[!idx])
+        
+        ## Skip if one child empty
+        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+          next
+        }
+        
+        ## TODO: Use splitrule parameter
+        ## Decrease of impurity
+        decrease <- sum(class_counts_left^2)/sum(class_counts_left) + 
+          sum(class_counts_right^2)/sum(class_counts_right)
+        
+        ## Use this split if better than before
+        if (decrease > best_decrease) {
+          best_split$value <- split_value
+          best_split$varID <- split_varID
+          best_split$decrease <- decrease
+        }
+      }
+      return(best_split)
+    },
+    
+    findBestSplitValuePartition = function(data_values, best_split) {
+      
+      ## TODO: Implement
+      stop("Partition splitting not implemented yet")
+      return(best_split)
+    },
     
     estimate = function(nodeID) {      
       ## Return class with maximal count, random at ties

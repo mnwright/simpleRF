@@ -90,18 +90,11 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
   }
   
   ## Unordered factors
-  if (unordered_factors == "ignore") {
-    ## TODO: Do this somewhere else?
-    ## Factors to numeric
-    model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
-  } else if (unordered_factors == "order_once") {
-    
-  } else if (unordered_factors == "order_split") {
-    
-  } else if (unordered_factors == "partition") {
-    
-  } else {
+  if (!(unordered_factors %in% c("ignore", "order_once", "order_split", "partition"))) {
     stop("Unknown value for unordered_factors.")
+  }
+  if (unordered_factors == "order_once") {
+    ## TODO: Order!
   }
     
   ## Create forest object
