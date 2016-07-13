@@ -5,7 +5,8 @@
 \title{simpleRF}
 \usage{
 simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
-  replace = TRUE, probability = FALSE, splitrule = NULL)
+  replace = TRUE, probability = FALSE, splitrule = NULL,
+  unordered_factors = "ignore")
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
@@ -23,12 +24,20 @@ simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
 \item{probability}{Grow a probability forest. Default FALSE.}
 
 \item{splitrule}{Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.}
+
+\item{unordered_factors}{How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".}
 }
 \description{
 Implements Random Forests (Breiman 2001) with emphasis on simplicity. 
 Uses reference classes and only plain \code{R}. 
 Not optimized for computation speed. 
 Allows rapid prototyping of RF-type algorithms.
+}
+\details{
+Unordered factor variables can be handled in different ways. 
+Use "ignore" to treat them as ordered in the order of the factor levels. 
+With "order_once" and "order_split" they are ordered by their response values. For "order_once" this is done once before the analysis, for "order_split" this is done in each split.
+With "partition" all 2-partitions of the factor levels are considered for splitting.
 }
 \examples{
 \donttest{

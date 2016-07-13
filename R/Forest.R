@@ -10,6 +10,7 @@ Forest <- setRefClass("Forest",
     mtry = "integer", 
     min_node_size = "integer", 
     splitrule = "character",
+    unordered_factors = "character",
     data = "Data",
     predict_data = "Data",
     formula = "formula",
@@ -68,6 +69,7 @@ Forest <- setRefClass("Forest",
       cat("Mtry:                            ", mtry, "\n")
       cat("Target node size:                ", min_node_size, "\n")
       cat("Replace                          ", replace, "\n")
+      cat("Unordered factor handling        ", unordered_factors, "\n")
       cat("OOB prediction error:            ", predictionError(), "\n")
     }, 
     

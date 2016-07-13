@@ -7,6 +7,7 @@ Tree <- setRefClass("Tree",
     mtry = "integer", 
     min_node_size = "integer",
     splitrule = "character",
+    unordered_factors = "character",
     data = "Data", 
     sampleIDs = "list",    
     oob_sampleIDs = "integer",
@@ -50,6 +51,7 @@ Tree <- setRefClass("Tree",
         right_child <- length(sampleIDs) + 2
         child_nodeIDs[[nodeID]] <<- c(left_child, right_child)
         
+        ## TODO: Handle unordered factors
         ## For each sample in node, assign to left (<= split val) or right (> split val) child
         idx <- data$subset(sampleIDs[[nodeID]], split$varID) <= split$value
         sampleIDs[[left_child]] <<- sampleIDs[[nodeID]][idx]
@@ -91,6 +93,7 @@ Tree <- setRefClass("Tree",
             break
           }
           
+          ## TODO: Handle unordered factors
           ## Move to child
           if (predict_data$subset(i, split_varIDs[nodeID]) <= split_values[nodeID]) {
             nodeID <- child_nodeIDs[[nodeID]][1];
@@ -119,6 +122,7 @@ Tree <- setRefClass("Tree",
             break
           }
           
+          ## TODO: Handle unordered factors
           ## Move to child
           if (data$subset(oob_sampleIDs[i], split_varIDs[nodeID]) <= split_values[nodeID]) {
             nodeID <- child_nodeIDs[[nodeID]][1];

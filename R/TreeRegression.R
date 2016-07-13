@@ -35,6 +35,7 @@ TreeRegression <- setRefClass("TreeRegression",
         for (j in 1:length(possible_split_values)) {
           split_value <- possible_split_values[j]
           
+          ## TODO: Handle unordered factors
           ## Sum responses in childs
           idx <- data_values <= split_value
           response_left <- response[idx]

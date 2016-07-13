@@ -3,6 +3,11 @@
 ##' Not optimized for computation speed. 
 ##' Allows rapid prototyping of RF-type algorithms.
 ##' 
+##' Unordered factor variables can be handled in different ways. 
+##' Use "ignore" to treat them as ordered in the order of the factor levels. 
+##' With "order_once" and "order_split" they are ordered by their response values. For "order_once" this is done once before the analysis, for "order_split" this is done in each split.
+##' With "partition" all 2-partitions of the factor levels are considered for splitting.
+##' 
 ##' @title simpleRF
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit.
 ##' @param data Training data of class \code{data.frame}.
@@ -12,6 +17,7 @@
 ##' @param replace Sample with replacement. Default TRUE.
 ##' @param probability Grow a probability forest. Default FALSE.
 ##' @param splitrule Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.
+##' @param unordered_factors How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".
 ##' @examples 
 ##' \donttest{
 ##' library(simpleRF)
@@ -34,7 +40,7 @@
 ##' @export
 simpleRF <- function(formula, data, num_trees = 50, mtry = NULL, 
                      min_node_size = NULL, replace = TRUE, probability = FALSE, 
-                     splitrule = NULL) {
+                     splitrule = NULL, unordered_factors = "ignore") {
   
   model.data <- model.frame(formula, data)
   
@@ -83,8 +89,20 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
     }
   }
   
-  ## Factors to numeric
-  model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
+  ## Unordered factors
+  if (unordered_factors == "ignore") {
+    ## TODO: Do this somewhere else?
+    ## Factors to numeric
+    model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
+  } else if (unordered_factors == "order_once") {
+    
+  } else if (unordered_factors == "order_split") {
+    
+  } else if (unordered_factors == "partition") {
+    
+  } else {
+    stop("Unknown value for unordered_factors.")
+  }
     
   ## Create forest object
   if (treetype == "Classification") {
@@ -92,19 +110,21 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
                                        min_node_size = as.integer(min_node_size), 
                                        replace = replace, splitrule = splitrule,
                                        data = Data$new(data = model.data), 
-                                       formula = formula, response_levels = levels(model.data[, 1]))
+                                       formula = formula,  unordered_factors = unordered_factors, 
+                                       response_levels = levels(model.data[, 1]))
   } else if (treetype == "Probability") {
     forest <- ForestProbability$new(num_trees = as.integer(num_trees), mtry = as.integer(mtry), 
                                    min_node_size = as.integer(min_node_size), 
                                    replace = replace, splitrule = splitrule,
                                    data = Data$new(data = model.data), 
-                                   formula = formula, response_levels = levels(model.data[, 1]))
+                                   formula = formula, unordered_factors = unordered_factors,
+                                   response_levels = levels(model.data[, 1]))
   } else if (treetype == "Regression") {
     forest <- ForestRegression$new(num_trees = as.integer(num_trees), mtry = as.integer(mtry), 
                                    min_node_size = as.integer(min_node_size), 
                                    replace = replace, splitrule = splitrule,
                                    data = Data$new(data = model.data), 
-                                   formula = formula)
+                                   formula = formula, unordered_factors = unordered_factors)
   } else if (treetype == "Survival") {
     idx.death <- model.data[, 1][, 2] == 1
     timepoints <- sort(unique(model.data[idx.death, 1][, 1]))
@@ -112,7 +132,8 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
                                  min_node_size = as.integer(min_node_size), 
                                  replace = replace, splitrule = splitrule,
                                  data = Data$new(data = model.data), 
-                                 formula = formula, timepoints = timepoints)
+                                 formula = formula, unordered_factors = unordered_factors, 
+                                 timepoints = timepoints)
   } else {
     stop("Unkown tree type.")
   }

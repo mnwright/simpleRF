@@ -51,6 +51,7 @@ TreeSurvival <- setRefClass("TreeSurvival",
         for (j in 1:length(possible_split_values)) {
           split_value <- possible_split_values[j]
           
+          ## TODO: Handle unordered factors
           ## Count classes in childs
           idx <- data_values <= split_value
           
