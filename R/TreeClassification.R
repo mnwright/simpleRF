@@ -66,15 +66,13 @@ TreeClassification <- setRefClass("TreeClassification",
           best_split = findBestSplitValueOrdered(split_varID, data_values, best_split, response)
           
           ## Set split levels left (empty if ordered splitting)
-      #    if (unordered_factors == "order_split") {
-          #browser()
+         if (unordered_factors == "order_split") {
           if (best_split$varID == split_varID) {
             split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
           }
-            #browser()
-      #    } else {
-      #      split_levels_left[[nodeID]] <<- list()
-      #    }
+         } else {
+           split_levels_left[[nodeID]] <<- list()
+         }
         }
       }
       
