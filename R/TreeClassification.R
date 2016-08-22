@@ -39,20 +39,42 @@ TreeClassification <- setRefClass("TreeClassification",
         data_values <- data$subset(sampleIDs[[nodeID]], split_varID)
         
         ## Handle ordered factors
-        if (!is.ordered(data_values)) {
-          if (unordered_factors %in% c("ignore", "order_once")) {
-            data_values <- as.ordered(data_values)
-          } else if (unordered_factors == "order_split") {
-            ## TODO: Order!
-            data_values <- as.ordered(data_values)
-          } 
+        if (!is.ordered(data_values) & unordered_factors == "order_split") {
+          ## TODO: Move to function?
+          ## Numeric response
+          if (is.factor(response)) {
+            num.response <- as.numeric(response)
+          } else if ("Surv" %in% class(response)) {
+            num.response <- response[, 1]
+          } else {
+            num.response <- response
+          }
+          
+          ## Order factor levels
+          means <- aggregate(num.response ~ data_values, FUN=mean)
+          levels.ordered <- means$data_values[order(means$num.response)]
+          
+          ## Return reordered factor
+          data_values <- factor(data_values, levels = levels.ordered, ordered = TRUE)
         }
         
         ## If still not ordered, use partition splitting
         if (!is.ordered(data_values)) {
+          ## TODO: set split_levels_left somewhere
           best_split = findBestSplitValuePartition(data_values, best_split)
         } else {
-          best_split = findBestSplitValueOrdered(data_values, best_split)
+          best_split = findBestSplitValueOrdered(split_varID, data_values, best_split, response)
+          
+          ## Set split levels left (empty if ordered splitting)
+      #    if (unordered_factors == "order_split") {
+          #browser()
+          if (best_split$varID == split_varID) {
+            split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+          }
+            #browser()
+      #    } else {
+      #      split_levels_left[[nodeID]] <<- list()
+      #    }
         }
       }
       
@@ -68,11 +90,11 @@ TreeClassification <- setRefClass("TreeClassification",
       }      
     }, 
     
-    findBestSplitValueOrdered = function(data_values, best_split) {
+    findBestSplitValueOrdered = function(split_varID, data_values, best_split, response) {
       ## Convert to numeric if necessary
-      if(!is.numeric(data_values)) {
-        data_values <- as.numeric(data_values)
-      }
+      # if(!is.numeric(data_values)) {
+      #   data_values <- as.numeric(data_values)
+      # }
 
       ## For all possible splits
       possible_split_values <- unique(data_values)
@@ -95,7 +117,7 @@ TreeClassification <- setRefClass("TreeClassification",
           sum(class_counts_right^2)/sum(class_counts_right)
         
         ## Use this split if better than before
-        if (decrease > best_decrease) {
+        if (decrease > best_split$decrease) {
           best_split$value <- split_value
           best_split$varID <- split_varID
           best_split$decrease <- decrease

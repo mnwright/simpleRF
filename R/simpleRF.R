@@ -94,7 +94,40 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
     stop("Unknown value for unordered_factors.")
   }
   if (unordered_factors == "order_once") {
-    ## TODO: Order!
+    ## TODO: Move to function!
+    ## Recode characters and unordered factors
+    character.idx <- sapply(model.data[, -1], is.character)
+    ordered.idx <- sapply(model.data[, -1], is.ordered)
+    factor.idx <- sapply(model.data[, -1], is.factor)
+    recode.idx <- character.idx | (factor.idx & !ordered.idx)
+    
+    ## Numeric response
+    response <- model.data[, 1]
+    if (is.factor(response)) {
+      num.response <- as.numeric(response)
+    } else if ("Surv" %in% class(response)) {
+      num.response <- response[, 1]
+    } else {
+      num.response <- response
+    }
+    
+    ## Recode each column
+    model.data[, -1][, recode.idx] <- lapply(model.data[, -1][, recode.idx], function(x) {
+      ## Order factor levels
+      means <- aggregate(num.response~x, FUN=mean)
+      levels.ordered <- means$x[order(means$num.response)]
+      
+      ## Return reordered factor
+      factor(x, levels = levels.ordered, ordered = TRUE)
+    })
+    
+    ## TODO: Where to save levels? Or just save left child values in all cases?
+    ## Save levels
+    covariate.levels <- lapply(model.data[, -1], levels)
+  }
+  if (unordered_factors == "ignore") {
+    ## Just set to ordered if "ignore"
+    model.data[, -1] <- lapply(model.data[, -1], as.ordered)
   }
     
   ## Create forest object
