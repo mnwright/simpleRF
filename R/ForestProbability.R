@@ -8,14 +8,14 @@ ForestProbability <- setRefClass("ForestProbability",
     response_levels = "character"), 
   methods = list(
     
-    grow = function() {      
+    grow = function(num_threads) {      
       treetype <<- "Probability"
       
       ## Create trees
       trees <<- replicate(num_trees, TreeProbability$new())
       
       ## Call parent method
-      callSuper()
+      callSuper(num_threads)
     }, 
     
     predict = function(newdata) {

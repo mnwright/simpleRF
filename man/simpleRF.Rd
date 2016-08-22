@@ -6,7 +6,7 @@
 \usage{
 simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
   replace = TRUE, probability = FALSE, splitrule = NULL,
-  unordered_factors = "ignore")
+  unordered_factors = "ignore", num_threads = 1)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}
@@ -26,6 +26,8 @@ simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
 \item{splitrule}{Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.}
 
 \item{unordered_factors}{How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".}
+
+\item{num_threads}{Number of threads used for mclapply, set to 1 for debugging.}
 }
 \description{
 Implements Random Forests (Breiman 2001) with emphasis on simplicity. 

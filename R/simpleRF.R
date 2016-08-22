@@ -18,6 +18,7 @@
 ##' @param probability Grow a probability forest. Default FALSE.
 ##' @param splitrule Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.
 ##' @param unordered_factors How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".
+##' @param num_threads Number of threads used for mclapply, set to 1 for debugging.
 ##' @examples 
 ##' \donttest{
 ##' library(simpleRF)
@@ -40,7 +41,8 @@
 ##' @export
 simpleRF <- function(formula, data, num_trees = 50, mtry = NULL, 
                      min_node_size = NULL, replace = TRUE, probability = FALSE, 
-                     splitrule = NULL, unordered_factors = "ignore") {
+                     splitrule = NULL, unordered_factors = "ignore", 
+                     num_threads = 1) {
   
   model.data <- model.frame(formula, data)
   
@@ -93,41 +95,21 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
   if (!(unordered_factors %in% c("ignore", "order_once", "order_split", "partition"))) {
     stop("Unknown value for unordered_factors.")
   }
+  covariate_levels <- list()
+  
   if (unordered_factors == "order_once") {
-    ## TODO: Move to function!
-    ## Recode characters and unordered factors
-    character.idx <- sapply(model.data[, -1], is.character)
-    ordered.idx <- sapply(model.data[, -1], is.ordered)
-    factor.idx <- sapply(model.data[, -1], is.factor)
-    recode.idx <- character.idx | (factor.idx & !ordered.idx)
+    ## Reorder factor columns depending on response type
+    model.data <- reorder.factor.columns(model.data)
     
-    ## Numeric response
-    response <- model.data[, 1]
-    if (is.factor(response)) {
-      num.response <- as.numeric(response)
-    } else if ("Surv" %in% class(response)) {
-      num.response <- response[, 1]
-    } else {
-      num.response <- response
-    }
-    
-    ## Recode each column
-    model.data[, -1][, recode.idx] <- lapply(model.data[, -1][, recode.idx], function(x) {
-      ## Order factor levels
-      means <- aggregate(num.response~x, FUN=mean)
-      levels.ordered <- means$x[order(means$num.response)]
-      
-      ## Return reordered factor
-      factor(x, levels = levels.ordered, ordered = TRUE)
-    })
-    
-    ## TODO: Where to save levels?
     ## Save levels
-    covariate.levels <- lapply(model.data[, -1], levels)
+    covariate_levels <- lapply(model.data[, -1], levels)
   }
   else if (unordered_factors == "ignore") {
     ## Just set to ordered if "ignore"
     model.data[, -1] <- lapply(model.data[, -1], as.ordered)
+    
+    ## Save levels
+    covariate_levels <- lapply(model.data[, -1], levels)
   }
     
   ## Create forest object
@@ -136,7 +118,8 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
                                        min_node_size = as.integer(min_node_size), 
                                        replace = replace, splitrule = splitrule,
                                        data = Data$new(data = model.data), 
-                                       formula = formula,  unordered_factors = unordered_factors, 
+                                       formula = formula, unordered_factors = unordered_factors, 
+                                       covariate_levels = covariate_levels,
                                        response_levels = levels(model.data[, 1]))
   } else if (treetype == "Probability") {
     forest <- ForestProbability$new(num_trees = as.integer(num_trees), mtry = as.integer(mtry), 
@@ -144,13 +127,15 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
                                    replace = replace, splitrule = splitrule,
                                    data = Data$new(data = model.data), 
                                    formula = formula, unordered_factors = unordered_factors,
+                                   covariate_levels = covariate_levels,
                                    response_levels = levels(model.data[, 1]))
   } else if (treetype == "Regression") {
     forest <- ForestRegression$new(num_trees = as.integer(num_trees), mtry = as.integer(mtry), 
                                    min_node_size = as.integer(min_node_size), 
                                    replace = replace, splitrule = splitrule,
                                    data = Data$new(data = model.data), 
-                                   formula = formula, unordered_factors = unordered_factors)
+                                   formula = formula, unordered_factors = unordered_factors, 
+                                   covariate_levels = covariate_levels)
   } else if (treetype == "Survival") {
     idx.death <- model.data[, 1][, 2] == 1
     timepoints <- sort(unique(model.data[idx.death, 1][, 1]))
@@ -159,13 +144,14 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
                                  replace = replace, splitrule = splitrule,
                                  data = Data$new(data = model.data), 
                                  formula = formula, unordered_factors = unordered_factors, 
+                                 covariate_levels = covariate_levels,
                                  timepoints = timepoints)
   } else {
     stop("Unkown tree type.")
   }
 
   ## Grow forest
-  forest$grow()
+  forest$grow(num_threads = num_threads)
 
   ## Return forest
   return(forest) 

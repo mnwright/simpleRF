@@ -57,7 +57,7 @@ Tree <- setRefClass("Tree",
           ## Ordered splitting
           idx <- data$subset(sampleIDs[[nodeID]], split$varID) <= split$value
         } else {
-        # Unordered splitting
+          # Unordered splitting
           idx <- data$subset(sampleIDs[[nodeID]], split$varID) %in% split_levels_left[[nodeID]]
         }
         sampleIDs[[left_child]] <<- sampleIDs[[nodeID]][idx]

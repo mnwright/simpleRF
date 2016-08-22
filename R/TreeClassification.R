@@ -40,17 +40,8 @@ TreeClassification <- setRefClass("TreeClassification",
         
         ## Handle ordered factors
         if (!is.ordered(data_values) & unordered_factors == "order_split") {
-          ## TODO: Move to function?
-          ## Numeric response
-          if (is.factor(response)) {
-            num.response <- as.numeric(response)
-          } else if ("Surv" %in% class(response)) {
-            num.response <- response[, 1]
-          } else {
-            num.response <- response
-          }
-          
           ## Order factor levels
+          num.response <- as.numeric(response)
           means <- aggregate(num.response ~ data_values, FUN=mean)
           levels.ordered <- means$data_values[order(means$num.response)]
           
@@ -60,19 +51,23 @@ TreeClassification <- setRefClass("TreeClassification",
         
         ## If still not ordered, use partition splitting
         if (!is.ordered(data_values)) {
-          ## TODO: set split_levels_left somewhere
-          best_split = findBestSplitValuePartition(data_values, best_split)
+          best_split = findBestSplitValuePartition(split_varID, data_values, best_split, response)
+          
+          ## Set split levels left
+          if (best_split$varID == split_varID) {
+            split_levels_left[[nodeID]] <<- best_split$values_left
+          }
         } else {
           best_split = findBestSplitValueOrdered(split_varID, data_values, best_split, response)
           
           ## Set split levels left (empty if ordered splitting)
-         if (unordered_factors == "order_split") {
-          if (best_split$varID == split_varID) {
-            split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+          if (unordered_factors == "order_split") {
+            if (best_split$varID == split_varID) {
+              split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+            }
+          } else {
+            split_levels_left[[nodeID]] <<- list()
           }
-         } else {
-           split_levels_left[[nodeID]] <<- list()
-         }
         }
       }
       
@@ -89,11 +84,6 @@ TreeClassification <- setRefClass("TreeClassification",
     }, 
     
     findBestSplitValueOrdered = function(split_varID, data_values, best_split, response) {
-      ## Convert to numeric if necessary
-      # if(!is.numeric(data_values)) {
-      #   data_values <- as.numeric(data_values)
-      # }
-
       ## For all possible splits
       possible_split_values <- unique(data_values)
       for (j in 1:length(possible_split_values)) {
@@ -109,10 +99,13 @@ TreeClassification <- setRefClass("TreeClassification",
           next
         }
         
-        ## TODO: Use splitrule parameter
-        ## Decrease of impurity
-        decrease <- sum(class_counts_left^2)/sum(class_counts_left) + 
-          sum(class_counts_right^2)/sum(class_counts_right)
+        if (splitrule == "Gini") {
+          ## Decrease of impurity
+          decrease <- sum(class_counts_left^2)/sum(class_counts_left) + 
+            sum(class_counts_right^2)/sum(class_counts_right)
+        } else {
+          stop("Unknown splitrule.")
+        }
         
         ## Use this split if better than before
         if (decrease > best_split$decrease) {
@@ -124,10 +117,38 @@ TreeClassification <- setRefClass("TreeClassification",
       return(best_split)
     },
     
-    findBestSplitValuePartition = function(data_values, best_split) {
+    findBestSplitValuePartition = function(split_varID, data_values, best_split, response) {
+      ## For all possible splits
+      possible_split_values <- unique(data_values)
       
-      ## TODO: Implement
-      stop("Partition splitting not implemented yet")
+      for (j in 1:length(possible_split_values)) {
+        values_left <- possible_split_values[1:j]
+        
+        ## Count classes in childs
+        idx <- data_values %in% values_left
+        class_counts_left <- tabulate(response[idx])
+        class_counts_right <- tabulate(response[!idx])
+        
+        ## Skip if one child empty
+        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+          next
+        }
+        
+        if (splitrule == "Gini") {
+          ## Decrease of impurity
+          decrease <- sum(class_counts_left^2)/sum(class_counts_left) + 
+            sum(class_counts_right^2)/sum(class_counts_right)
+        } else {
+          stop("Unknown splitrule.")
+        }
+        
+        ## Use this split if better than before
+        if (decrease > best_split$decrease) {
+          best_split$values_left <- values_left
+          best_split$varID <- split_varID
+          best_split$decrease <- decrease
+        }
+      }
       return(best_split)
     },
     

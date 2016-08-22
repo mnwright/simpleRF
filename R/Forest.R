@@ -16,10 +16,11 @@ Forest <- setRefClass("Forest",
     formula = "formula",
     trees = "list",
     treetype = "character",
-    replace = "logical"),
+    replace = "logical", 
+    covariate_levels = "list"),
   methods = list(
     
-    grow = function() { 
+    grow = function(num_threads) { 
       
       ## Init trees
       temp <- lapply(trees, function(x) {
@@ -31,17 +32,29 @@ Forest <- setRefClass("Forest",
       })
       
       ## Grow trees
-      ## TODO: Use mclapply (parallel package). Use a parameter to enable/disable because debugging is hard with mclapply.
-      trees <<- lapply(trees, function(x) {
+      trees <<- mclapply(trees, function(x) {
         x$grow(replace)
         x
-      })
+      }, mc.cores = num_threads)
     }, 
     
     predict = function(newdata) {
       model.data <- model.frame(formula, newdata)
-      ## TODO: Handle unordered splitting
-      model.data[, -1] <- sapply(model.data[, -1] , as.numeric)
+
+      if (unordered_factors %in% c("order_once", "ignore")) {
+        ## Recode factors if forest grown 'order_once' mode
+        if (length(covariate_levels) > 0) {
+          model.data[, -1] <- mapply(function(x, y) {
+            if(is.null(y)) {
+              x
+            } else {
+              factor(x, levels = y, ordered = TRUE)
+            }
+          }, model.data[, -1], covariate_levels, SIMPLIFY = FALSE)
+        }
+      }
+
+      ## Save prediction data in model
       predict_data <<- Data$new(data = model.data)
       
       ## Predict in trees

@@ -9,14 +9,14 @@ ForestSurvival <- setRefClass("ForestSurvival",
      timepoints = "numeric"), 
   methods = list(
     
-    grow = function() {      
+    grow = function(num_threads) {      
       treetype <<- "Survival"
       
       ## Create trees
       trees <<- replicate(num_trees, TreeSurvival$new(timepoints = timepoints))
       
       ## Call parent method
-      callSuper()
+      callSuper(num_threads)
     }, 
     
     predict = function(newdata) {
