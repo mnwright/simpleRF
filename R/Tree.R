@@ -52,16 +52,13 @@ Tree <- setRefClass("Tree",
         right_child <- length(sampleIDs) + 2
         child_nodeIDs[[nodeID]] <<- c(left_child, right_child)
         
-        ## TODO: Remove? Remove check everywhere..
         ## For each sample in node, assign to left or right child
         if (length(split_levels_left[[nodeID]]) == 0) {
           ## Ordered splitting
           idx <- data$subset(sampleIDs[[nodeID]], split$varID) <= split$value
-          #browser()
         } else {
         # Unordered splitting
           idx <- data$subset(sampleIDs[[nodeID]], split$varID) %in% split_levels_left[[nodeID]]
-          #browser()
         }
         sampleIDs[[left_child]] <<- sampleIDs[[nodeID]][idx]
         sampleIDs[[right_child]] <<- sampleIDs[[nodeID]][!idx]                    
@@ -145,16 +142,16 @@ Tree <- setRefClass("Tree",
           if (length(split_levels_left[[nodeID]]) == 0) {
             ## Ordered splitting
             if (data$subset(oob_sampleIDs[i], split_varIDs[nodeID]) <= split_values[nodeID]) {
-              nodeID <- child_nodeIDs[[nodeID]][1];
+              nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
-              nodeID <- child_nodeIDs[[nodeID]][2];
+              nodeID <- child_nodeIDs[[nodeID]][2]
             }
           } else {
             ## Unordered splitting
             if (data$subset(oob_sampleIDs[i], split_varIDs[nodeID]) %in% split_levels_left[[nodeID]]) {
-              nodeID <- child_nodeIDs[[nodeID]][1];
+              nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
-              nodeID <- child_nodeIDs[[nodeID]][2];
+              nodeID <- child_nodeIDs[[nodeID]][2]
             }
           }
           

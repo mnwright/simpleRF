@@ -121,11 +121,11 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
       factor(x, levels = levels.ordered, ordered = TRUE)
     })
     
-    ## TODO: Where to save levels? Or just save left child values in all cases?
+    ## TODO: Where to save levels?
     ## Save levels
     covariate.levels <- lapply(model.data[, -1], levels)
   }
-  if (unordered_factors == "ignore") {
+  else if (unordered_factors == "ignore") {
     ## Just set to ordered if "ignore"
     model.data[, -1] <- lapply(model.data[, -1], as.ordered)
   }
