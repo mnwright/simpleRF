@@ -16,7 +16,7 @@
 ##' @param min_node_size Minimal node size. Default 1 for classification, 5 for regression and 3 for survival.
 ##' @param replace Sample with replacement. Default TRUE.
 ##' @param probability Grow a probability forest. Default FALSE.
-##' @param splitrule Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.
+##' @param splitrule Splitrule to use in trees. Default "Gini" for classification and probability forests, "Variance" for regression forests and "Logrank" for survival forests.
 ##' @param unordered_factors How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".
 ##' @param num_threads Number of threads used for mclapply, set to 1 for debugging.
 ##' @examples 
@@ -83,7 +83,7 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
     if (treetype == "Classification") {
       splitrule <- "Gini"
     } else if (treetype == "Probability") {
-      splitrule <- "Variance"
+      splitrule <- "Gini"
     } else if (treetype == "Regression") {
       splitrule <- "Variance"
     } else if (treetype == "Survival") {

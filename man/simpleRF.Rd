@@ -23,7 +23,7 @@ simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
 
 \item{probability}{Grow a probability forest. Default FALSE.}
 
-\item{splitrule}{Splitrule to use in trees. Default "Gini" for classification forests, "Variance" for regression and probability forests and "Logrank" for survival forests.}
+\item{splitrule}{Splitrule to use in trees. Default "Gini" for classification and probability forests, "Variance" for regression forests and "Logrank" for survival forests.}
 
 \item{unordered_factors}{How to handle unordered factor variables. One of "ignore", "order_once", "order_split" and "partition" with default "ignore".}
 
