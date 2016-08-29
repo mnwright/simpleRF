@@ -103,16 +103,16 @@ Tree <- setRefClass("Tree",
           if (length(split_levels_left[[nodeID]]) == 0) {
             ## Ordered splitting
             if (predict_data$subset(i, split_varIDs[nodeID]) <= split_values[nodeID]) {
-              nodeID <- child_nodeIDs[[nodeID]][1];
+              nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
-              nodeID <- child_nodeIDs[[nodeID]][2];
+              nodeID <- child_nodeIDs[[nodeID]][2]
             }
           } else {
             ## Unordered splitting
             if (predict_data$subset(i, split_varIDs[nodeID]) %in% split_levels_left[[nodeID]]) {
-              nodeID <- child_nodeIDs[[nodeID]][1];
+              nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
-              nodeID <- child_nodeIDs[[nodeID]][2];
+              nodeID <- child_nodeIDs[[nodeID]][2]
             }
           }
           

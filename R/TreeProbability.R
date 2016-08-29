@@ -26,9 +26,9 @@ TreeProbability <- setRefClass("TreeProbability",
     findBestSplit = function(nodeID, possible_split_varIDs) {
       
       ## Initialize
-      best_decrease <- -1;
-      best_varID <- -1;
-      best_value <- -1;
+      best_decrease <- -1
+      best_varID <- -1
+      best_value <- -1
       response <- data$subset(sampleIDs[[nodeID]], 1)
       
       ## For all possible variables
