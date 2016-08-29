@@ -26,9 +26,9 @@ TreeClassification <- setRefClass("TreeClassification",
     findBestSplit = function(nodeID, possible_split_varIDs) {
       ## Initialize
       best_split <- NULL
-      best_split$decrease <- -1;
-      best_split$varID <- -1;
-      best_split$value <- -1;
+      best_split$decrease <- -1
+      best_split$varID <- -1
+      best_split$value <- -1
       
       ## Get response
       response <- data$subset(sampleIDs[[nodeID]], 1)
