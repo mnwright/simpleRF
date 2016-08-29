@@ -30,9 +30,12 @@ TreeSurvival <- setRefClass("TreeSurvival",
     
     findBestSplit = function(nodeID, possible_split_varIDs) {   
       ## Initialize
-      best_teststat <- -1
-      best_varID <- -1
-      best_value <- -1
+      best_split <- NULL
+      best_split$teststat <- -1
+      best_split$varID <- -1
+      best_split$value <- -1
+      
+      ## Get response
       response <- data$subset(sampleIDs[[nodeID]], 1)
       
       ## For all possible variables
@@ -40,67 +43,140 @@ TreeSurvival <- setRefClass("TreeSurvival",
         split_varID <- possible_split_varIDs[i]
         data_values <- data$subset(sampleIDs[[nodeID]], split_varID)
         
-        ## For all possible splits
-        possible_split_values <- unique(data_values)
-        
-        ## Try next variable if all equal for this
-        if (length(possible_split_values) < 2) {
-          next
+        ## Handle ordered factors
+        if (!is.ordered(data_values) & unordered_factors == "order_split") {
+          ## Order factor levels
+          num.response <- as.numeric(response[, 1])
+          means <- aggregate(num.response ~ data_values, FUN=mean)
+          levels.ordered <- means$data_values[order(means$num.response)]
+          
+          ## Return reordered factor
+          data_values <- factor(data_values, levels = levels.ordered, ordered = TRUE)
         }
         
-        for (j in 1:length(possible_split_values)) {
-          split_value <- possible_split_values[j]
+        ## If still not ordered, use partition splitting
+        if (!is.ordered(data_values)) {
+          best_split = findBestSplitValuePartition(split_varID, data_values, best_split, response)
           
-          ## TODO: Handle unordered factors
-          ## Count classes in childs
-          idx <- data_values <= split_value
-          
-          ## Skip if one child empty
-          if (sum(idx) == 0 | sum(!idx) == 0) {
-            next
+          ## Set split levels left
+          if (best_split$varID == split_varID) {
+            split_levels_left[[nodeID]] <<- best_split$values_left
           }
+        } else {
+          best_split = findBestSplitValueOrdered(split_varID, data_values, best_split, response)
           
-          ## Compute test statistic depending on splitrule
-          if (splitrule == "Logrank") {
-            ## Compute logrank test
-            teststat <- survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq
-          } else if (splitrule == "mean") {
-            time <- response[, 1]
-            time_child1 <- time[idx]
-            time_child2 <- time[!idx]
-            
-            mean_child1 <- mean(time_child1)
-            mean_child2 <- mean(time_child2)
-            
-            mean_diff_squared <- (mean_child1 - mean_child2)^2
-            teststat <- mean_diff_squared
-          } else if (splitrule == "Likelihood") {
-            stop("Not implemented yet.")
+          ## Set split levels left (empty if ordered splitting)
+          if (unordered_factors == "order_split") {
+            if (best_split$varID == split_varID) {
+              split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+            }
           } else {
-            stop("Unknown splitrule.")
-          }
-          
-          ## Use this split if better than before
-          if (teststat > best_teststat) {
-            best_value <- split_value
-            best_varID <- split_varID
-            best_teststat <- teststat
+            split_levels_left[[nodeID]] <<- list()
           }
         }
       }
       
-      if (best_varID < 0) {
+      if (best_split$varID < 0) {
         ## Stop if no good split found
         computeSurvival(nodeID, response)
         return(NULL)
       } else {
         ## Return best split
         result <- NULL
-        result$varID <- as.integer(best_varID)
-        result$value <- best_value
+        result$varID <- as.integer(best_split$varID)
+        result$value <- best_split$value
         return(result)
       }      
     }, 
+    
+    findBestSplitValueOrdered = function(split_varID, data_values, best_split, response) {
+      ## For all possible splits
+      possible_split_values <- unique(data_values)
+      for (j in 1:length(possible_split_values)) {
+        split_value <- possible_split_values[j]
+        
+        ## Count classes in childs
+        idx <- data_values <= split_value
+        class_counts_left <- tabulate(response[idx])
+        class_counts_right <- tabulate(response[!idx])
+        
+        ## Skip if one child empty
+        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+          next
+        }
+        
+        ## Compute test statistic depending on splitrule
+        if (splitrule == "Logrank") {
+          ## Compute logrank test
+          teststat <- survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq
+        } else if (splitrule == "mean") {
+          time <- response[, 1]
+          time_child1 <- time[idx]
+          time_child2 <- time[!idx]
+          
+          mean_child1 <- mean(time_child1)
+          mean_child2 <- mean(time_child2)
+          
+          mean_diff_squared <- (mean_child1 - mean_child2)^2
+          teststat <- mean_diff_squared
+        } else {
+          stop("Unknown splitrule.")
+        }
+        
+        ## Use this split if better than before
+        if (teststat > best_split$teststat) {
+          best_split$value <- split_value
+          best_split$varID <- split_varID
+          best_split$teststat <- teststat
+        }
+      }
+      return(best_split)
+    },
+    
+    findBestSplitValuePartition = function(split_varID, data_values, best_split, response) {
+      ## For all possible splits
+      possible_split_values <- unique(data_values)
+      
+      for (j in 1:length(possible_split_values)) {
+        values_left <- possible_split_values[1:j]
+        
+        ## Count classes in childs
+        idx <- data_values %in% values_left
+        class_counts_left <- tabulate(response[idx])
+        class_counts_right <- tabulate(response[!idx])
+        
+        ## Skip if one child empty
+        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+          next
+        }
+        
+        ## Compute test statistic depending on splitrule
+        if (splitrule == "Logrank") {
+          ## Compute logrank test
+          teststat <- survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq
+        } else if (splitrule == "mean") {
+          time <- response[, 1]
+          time_child1 <- time[idx]
+          time_child2 <- time[!idx]
+          
+          mean_child1 <- mean(time_child1)
+          mean_child2 <- mean(time_child2)
+          
+          mean_diff_squared <- (mean_child1 - mean_child2)^2
+          teststat <- mean_diff_squared
+        } else {
+          stop("Unknown splitrule.")
+        }
+        
+        ## Use this split if better than before
+        if (teststat > best_split$teststat) {
+          best_split$values_left <- values_left
+          best_split$varID <- split_varID
+          best_split$teststat <- teststat
+        }
+      }
+      return(best_split)
+    },
     
     estimate = function(nodeID) {      
       ## Return only NA, value is not used later
