@@ -102,7 +102,7 @@ Tree <- setRefClass("Tree",
           ## Move to child
           if (length(split_levels_left[[nodeID]]) == 0) {
             ## Ordered splitting
-            if (predict_data$subset(i, split_varIDs[nodeID]) <= split_values[nodeID]) {
+            if (as.numeric(predict_data$subset(i, split_varIDs[nodeID])) <= split_values[nodeID]) {
               nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
               nodeID <- child_nodeIDs[[nodeID]][2]
