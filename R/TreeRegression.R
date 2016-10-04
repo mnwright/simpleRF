@@ -13,6 +13,12 @@ TreeRegression <- setRefClass("TreeRegression",
         return(NULL)
       }
       
+      ## Stop if node is pure      
+      unique_response <- unique(data$subset(sampleIDs[[nodeID]], 1))
+      if (length(unique_response) == 1) {
+        return(NULL)
+      }
+      
       ## Find best split, stop if no decrease of impurity
       return(findBestSplit(nodeID, possible_split_varIDs))
     }, 
