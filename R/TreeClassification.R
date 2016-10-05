@@ -121,8 +121,12 @@ TreeClassification <- setRefClass("TreeClassification",
       ## For all possible splits
       possible_split_values <- unique(data_values)
       
-      for (j in 1:length(possible_split_values)) {
-        values_left <- possible_split_values[1:j]
+      ## For all 2^n 2-partitions
+      num_partitions <- 2^length(possible_split_values)
+      for (j in 1:num_partitions) {
+        ## Convert number to logic vector
+        left_idx <- as.integer(intToBits(j))[1:length(possible_split_values)] == 1
+        values_left <- possible_split_values[left_idx]
         
         ## Count classes in childs
         idx <- data_values %in% values_left
