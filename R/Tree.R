@@ -110,7 +110,7 @@ Tree <- setRefClass("Tree",
             }
           } else {
             ## Unordered splitting
-            value <- data$subset(oob_sampleIDs[i], split_varIDs[nodeID])
+            value <- predict_data$subset(i, split_varIDs[nodeID])
             if (value %in% split_levels_left[[nodeID]]) {
               nodeID <- child_nodeIDs[[nodeID]][1]
             } else {
