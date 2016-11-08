@@ -1,8 +1,8 @@
 Package: simpleRF
 Type: Package
 Title: Random Forests with emphasis on simplicity
-Version: 0.1
-Date: 2015-01-16
+Version: 0.1.2
+Date: 2016-11-08
 Author: Marvin N. Wright
 Maintainer: Marvin N. Wright <wright@imbs.uni-luebeck.de>
 Description: Uses reference classes and only plain R. Not optimized for
