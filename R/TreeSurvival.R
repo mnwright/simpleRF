@@ -23,6 +23,12 @@ TreeSurvival <- setRefClass("TreeSurvival",
         computeSurvival(nodeID, response)
         return(NULL)
       }
+      
+      ## Stop if no events      
+      if (all(response[, 2] == 0)) {
+        computeSurvival(nodeID, response)
+        return(NULL)
+      }
             
       ## Find best split, stop if no decrease of impurity
       return(findBestSplit(nodeID, possible_split_varIDs))
@@ -43,19 +49,26 @@ TreeSurvival <- setRefClass("TreeSurvival",
         split_varID <- possible_split_varIDs[i]
         data_values <- data$subset(sampleIDs[[nodeID]], split_varID)
         
+        ## Try next variable if all equal for this
+        if (length(unique(data_values)) < 2) {
+          next()
+        }
+        
         ## Handle ordered factors
-        if (!is.ordered(data_values) & unordered_factors == "order_split") {
-          ## Order factor levels
-          num.response <- as.numeric(response[, 1])
-          means <- aggregate(num.response ~ data_values, FUN=mean)
-          levels.ordered <- means$data_values[order(means$num.response)]
+        if (!is.numeric(data_values) & !is.ordered(data_values) & unordered_factors == "order_split") {
+          ## Use median survival if available or largest quantile available in all strata if median not available
+          levels.ordered <- largest.quantile(response ~ data_values)
           
+          ## Get all levels not in node
+          levels.missing <- setdiff(levels(data_values), levels.ordered)
+          levels.ordered <- c(levels.missing, levels.ordered)
+
           ## Return reordered factor
           data_values <- factor(data_values, levels = levels.ordered, ordered = TRUE)
         }
         
         ## If still not ordered, use partition splitting
-        if (!is.ordered(data_values)) {
+        if (!is.numeric(data_values) & !is.ordered(data_values)) {
           best_split = findBestSplitValuePartition(split_varID, data_values, best_split, response)
           
           ## Set split levels left

@@ -39,7 +39,7 @@ TreeClassification <- setRefClass("TreeClassification",
         data_values <- data$subset(sampleIDs[[nodeID]], split_varID)
         
         ## Handle ordered factors
-        if (!is.ordered(data_values) & unordered_factors == "order_split") {
+        if (!is.numeric(data_values) & !is.ordered(data_values) & unordered_factors == "order_split") {
           ## Order factor levels
           num.response <- as.numeric(response)
           means <- aggregate(num.response ~ data_values, FUN=mean)
@@ -50,7 +50,7 @@ TreeClassification <- setRefClass("TreeClassification",
         }
         
         ## If still not ordered, use partition splitting
-        if (!is.ordered(data_values)) {
+        if (!is.numeric(data_values) & !is.ordered(data_values)) {
           best_split = findBestSplitValuePartition(split_varID, data_values, best_split, response)
           
           ## Set split levels left
