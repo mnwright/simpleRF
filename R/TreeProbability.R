@@ -121,8 +121,8 @@ TreeProbability <- setRefClass("TreeProbability",
       ## For all possible splits
       possible_split_values <- unique(data_values)
       
-      ## For all 2^n 2-partitions
-      num_partitions <- 2^length(possible_split_values)
+      ## For all 2^(n-1)-1 2-partitions
+      num_partitions <- 2^(length(possible_split_values) - 1) - 1
       for (j in 1:num_partitions) {
         ## Convert number to logic vector
         left_idx <- as.integer(intToBits(j))[1:length(possible_split_values)] == 1

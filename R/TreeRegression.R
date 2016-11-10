@@ -131,7 +131,7 @@ TreeRegression <- setRefClass("TreeRegression",
       ## For all possible splits
       possible_split_values <- sort(unique(data_values))
 
-      ## For all 2^(n-1) 2-partitions
+      ## For all 2^(n-1)-1 2-partitions
       num_partitions <- 2^(length(possible_split_values) - 1) - 1
       for (j in 1:num_partitions) {
         ## Convert number to logic vector
