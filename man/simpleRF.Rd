@@ -17,7 +17,7 @@ simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
 
 \item{mtry}{Number of variables to possibly split at in each node.}
 
-\item{min_node_size}{Minimal node size. Default 1 for classification, 5 for regression and 3 for survival.}
+\item{min_node_size}{Minimal node size. Default 1 for classification, 5 for regression, 3 for survival and 10 for probability estimation.}
 
 \item{replace}{Sample with replacement. Default TRUE.}
 

@@ -13,7 +13,7 @@
 ##' @param data Training data of class \code{data.frame}.
 ##' @param num_trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node.
-##' @param min_node_size Minimal node size. Default 1 for classification, 5 for regression and 3 for survival.
+##' @param min_node_size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival and 10 for probability estimation.
 ##' @param replace Sample with replacement. Default TRUE.
 ##' @param probability Grow a probability forest. Default FALSE.
 ##' @param splitrule Splitrule to use in trees. Default "Gini" for classification and probability forests, "Variance" for regression forests and "Logrank" for survival forests.
@@ -70,7 +70,7 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
     if (treetype == "Classification") {
       min_node_size <- 1
     } else if (treetype == "Probability") {
-      min_node_size <- 1
+      min_node_size <- 10
     } else if (treetype == "Regression") {
       min_node_size <- 5
     } else if (treetype == "Survival") {
