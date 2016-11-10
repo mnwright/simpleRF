@@ -47,7 +47,7 @@ TreeRegression <- setRefClass("TreeRegression",
           
           ## Get all levels not in node
           levels.missing <- setdiff(levels(data_values), levels.ordered)
-          levels.ordered <- c(levels.ordered, levels.missing)
+          levels.ordered <- c(levels.missing, levels.ordered)
           
           ## Return reordered factor
           data_values <- factor(data_values, levels = levels.ordered, ordered = TRUE)
@@ -69,10 +69,12 @@ TreeRegression <- setRefClass("TreeRegression",
             if (best_split$varID == split_varID) {
               split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
 
-              ## TODO: Remove?
-              # if (max(as.numeric(levels(data_values))) %in% split_levels_left[[nodeID]]) {
-              #   split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
-              # }
+              ## Use same splits as in partition
+              chars <- sapply(split_levels_left[[nodeID]], as.character)
+              ints <- sapply(chars, as.integer)
+              if (sum(2^(ints-1)) >= 2^(max(as.numeric(as.character(unique(data_values)))) - 1)) {
+                split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
+              }
             }
           } else {
             split_levels_left[[nodeID]] <<- list()

@@ -82,6 +82,13 @@ TreeSurvival <- setRefClass("TreeSurvival",
           if (unordered_factors == "order_split") {
             if (best_split$varID == split_varID) {
               split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+              
+              ## Use same splits as in partition
+              chars <- sapply(split_levels_left[[nodeID]], as.character)
+              ints <- sapply(chars, as.integer)
+              if (sum(2^(ints-1)) >= 2^(max(as.numeric(as.character(unique(data_values)))) - 1)) {
+                split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
+              }
             }
           } else {
             split_levels_left[[nodeID]] <<- list()
