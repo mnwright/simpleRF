@@ -24,7 +24,6 @@ TreeRegression <- setRefClass("TreeRegression",
     }, 
     
     findBestSplit = function(nodeID, possible_split_varIDs) {
-      
       ## Initialize
       best_split <- NULL
       best_split$decrease <- -1
@@ -46,6 +45,10 @@ TreeRegression <- setRefClass("TreeRegression",
           means <- aggregate(num.response ~ data_values, FUN=mean)
           levels.ordered <- means$data_values[order(means$num.response)]
           
+          ## Get all levels not in node
+          levels.missing <- setdiff(levels(data_values), levels.ordered)
+          levels.ordered <- c(levels.ordered, levels.missing)
+          
           ## Return reordered factor
           data_values <- factor(data_values, levels = levels.ordered, ordered = TRUE)
         }
@@ -65,6 +68,11 @@ TreeRegression <- setRefClass("TreeRegression",
           if (unordered_factors == "order_split") {
             if (best_split$varID == split_varID) {
               split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
+
+              ## TODO: Remove?
+              # if (max(as.numeric(levels(data_values))) %in% split_levels_left[[nodeID]]) {
+              #   split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
+              # }
             }
           } else {
             split_levels_left[[nodeID]] <<- list()
@@ -108,7 +116,7 @@ TreeRegression <- setRefClass("TreeRegression",
         } else {
           stop("Unknown splitrule.")
         }
-        
+
         ## Use this split if better than before
         if (decrease > best_split$decrease) {
           best_split$value <- split_value
@@ -122,9 +130,9 @@ TreeRegression <- setRefClass("TreeRegression",
     findBestSplitValuePartition = function(split_varID, data_values, best_split, response) {
       ## For all possible splits
       possible_split_values <- sort(unique(data_values))
-      
+
       ## For all 2^(n-1) 2-partitions
-      num_partitions <- 2^(length(possible_split_values) - 1)
+      num_partitions <- 2^(length(possible_split_values) - 1) - 1
       for (j in 1:num_partitions) {
         ## Convert number to logic vector
         left_idx <- as.integer(intToBits(j))[1:length(possible_split_values)] == 1
@@ -147,7 +155,7 @@ TreeRegression <- setRefClass("TreeRegression",
         } else {
           stop("Unknown splitrule.")
         }
-
+        
         ## Use this split if better than before
         if (decrease > best_split$decrease) {
           best_split$values_left <- values_left
