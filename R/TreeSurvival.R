@@ -155,7 +155,7 @@ TreeSurvival <- setRefClass("TreeSurvival",
     
     findBestSplitValuePartition = function(split_varID, data_values, best_split, response) {
       ## For all possible splits
-      possible_split_values <- unique(data_values)
+      possible_split_values <- sort(unique(data_values))
       
       ## For all 2^(n-1)-1 2-partitions
       num_partitions <- 2^(length(possible_split_values) - 1) - 1
