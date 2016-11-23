@@ -69,12 +69,13 @@ TreeClassification <- setRefClass("TreeClassification",
             if (best_split$varID == split_varID) {
               split_levels_left[[nodeID]] <<- unique(data_values[data_values <= best_split$value])
               
-              ## Use same splits as in partition
-              ints <- as.integer(factor(split_levels_left[[nodeID]], levels = levels(data$subset(sampleIDs[[nodeID]], split_varID))))
-              if (sum(2^(ints-1)) >= 2^(max(as.numeric(data$subset(sampleIDs[[nodeID]], split_varID))) - 1)) {
-                split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
+              if (is.factor(data_values)) {
+                ## Use same splits as in partition
+                ints <- as.integer(factor(split_levels_left[[nodeID]], levels = levels(data$subset(sampleIDs[[nodeID]], split_varID))))
+                if (sum(2^(ints-1)) >= 2^(max(as.numeric(data$subset(sampleIDs[[nodeID]], split_varID))) - 1)) {
+                  split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
+                }
               }
-              
             }
           } else {
             split_levels_left[[nodeID]] <<- list()
