@@ -43,7 +43,7 @@ TreeProbability <- setRefClass("TreeProbability",
           ## Order factor levels
           num.response <- as.numeric(response)
           means <- aggregate(num.response ~ data_values, FUN=mean)
-          levels.ordered <- means$data_values[order(means$num.response)]
+          levels.ordered <- as.character(means$data_values[order(means$num.response)])
           
           ## Get all levels not in node
           levels.missing <- setdiff(levels(data_values), levels.ordered)

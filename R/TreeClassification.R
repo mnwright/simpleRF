@@ -43,7 +43,7 @@ TreeClassification <- setRefClass("TreeClassification",
           ## Order factor levels
           num.response <- as.numeric(response)
           means <- aggregate(num.response ~ data_values, FUN=mean)
-          levels.ordered <- means$data_values[order(means$num.response)]
+          levels.ordered <- as.character(means$data_values[order(means$num.response)])
           
           ## Get all levels not in node
           levels.missing <- setdiff(levels(data_values), levels.ordered)
@@ -74,6 +74,7 @@ TreeClassification <- setRefClass("TreeClassification",
               if (sum(2^(ints-1)) >= 2^(max(as.numeric(data$subset(sampleIDs[[nodeID]], split_varID))) - 1)) {
                 split_levels_left[[nodeID]] <<- unique(data_values[data_values > best_split$value])
               }
+              
             }
           } else {
             split_levels_left[[nodeID]] <<- list()
