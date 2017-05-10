@@ -1,5 +1,5 @@
 ## simpleRF
-Marvin N. Wright, wright@imbs.uni-luebeck.de
+Marvin N. Wright
 
 ### Description
 Implements random forests (RF, Breiman 2001) with emphasis on simplicity. Uses reference classes and only plain R. Not optimized for computation speed. Allows rapid prototyping of RF-type algorithms.

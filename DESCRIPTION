@@ -4,7 +4,7 @@ Title: Random Forests with emphasis on simplicity
 Version: 0.1
 Date: 2015-01-16
 Author: Marvin N. Wright
-Maintainer: Marvin N. Wright <wright@imbs.uni-luebeck.de>
+Maintainer: Marvin N. Wright <marv@wrig.de>
 Description: Uses reference classes and only plain R. Not optimized for
     computation speed. Allows rapid prototyping of RF-type algorithms.
 License: GPL-3
