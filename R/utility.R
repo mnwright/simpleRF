@@ -41,6 +41,35 @@ largest.quantile <- function(formula) {
   names(sort(quantiles))
 }
 
+##' Order factor levels with correlation approach
+##' @title Order factor levels with correlation approach
+##' @param y Response factor.
+##' @param x Covariate factor.
+##' @return Ordered factor levels
+##' @author Marvin N. Wright
+cor.order <- function(y, x) {
+  ## Create contingency table of the nominal outcome with the nominal covariate
+  tab <- table(droplevels(y), droplevels(x))
+  
+  ## Compute correlation matrix of the contingency table (correlation of the covariate levels w.r.t outcome)
+  cr <- suppressWarnings(cor(tab))
+  cr[is.na(cr)] <- 0                      
+  diag(cr) <- NA
+  
+  ## Start with a random level and select as next level the level with highest correlation to the current level (excluding already selected levels)
+  num_levels <- nlevels(droplevels(x))
+  next_level <- sample(num_levels, 1)
+  res <- c(next_level, rep(NA, num_levels - 1))
+  for (i in 2:num_levels) {
+    cr[, next_level] <- NA
+    next_level <- which.max.random(cr[next_level, ])
+    res[i] <- next_level
+  }
+  
+  ## Return ordered factor levels
+  as.character(levels(droplevels(x))[res])
+}
+
 ##' Reorder factor columns. Use mean for continuous response, class counts for factors and mean survival for survival response.
 ##' @title Reorder factor columns
 ##' @param data Data with factor columns.
@@ -73,24 +102,7 @@ reorder.factor.columns <- function(data) {
       levels.missing <- setdiff(levels(x), levels.ordered)
       levels.ordered <- c(levels.missing, levels.ordered)
     } else if (is.factor(response) & nlevels(response) > 2) {
-      ## Create contingency table of the nominal outcome with the nominal covariate
-      tab <- table(droplevels(response), droplevels(x))
-      
-      ## Compute correlation matrix of the contingency table (correlation of the covariate levels w.r.t outcome)
-      cr <- suppressWarnings(cor(tab))
-      cr[is.na(cr)] <- 0                      
-      diag(cr) <- NA
-      
-      ## Start with a random level and select as next level the level with highest correlation to the current level (excluding already selected levels)
-      num_levels <- nlevels(droplevels(x))
-      next_level <- sample(num_levels, 1)
-      res <- c(next_level, rep(NA, num_levels - 1))
-      for (i in 2:num_levels) {
-        cr[, next_level] <- NA
-        next_level <- which.max.random(cr[next_level, ])
-        res[i] <- next_level
-      }
-      levels.ordered <- as.character(levels(droplevels(x))[res])
+      levels.ordered <- cor.order(y = response, x = x)
     } else {
       ## Order factor levels by num.response
       means <- aggregate(num.response~x, FUN=mean)
