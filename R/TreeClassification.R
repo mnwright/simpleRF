@@ -42,7 +42,7 @@ TreeClassification <- setRefClass("TreeClassification",
         if (!is.numeric(data_values) & !is.ordered(data_values) & unordered_factors == "order_split") {
           ## Order factor levels
           if (nlevels(response) > 2) {
-            levels.ordered <- cor.order(y = response, x = x)
+            levels.ordered <- cor.order(y = response, x = data_values)
           } else {
             num.response <- as.numeric(response)
             means <- aggregate(num.response ~ data_values, FUN=mean)
