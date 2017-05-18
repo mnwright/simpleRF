@@ -72,6 +72,25 @@ reorder.factor.columns <- function(data) {
       ## Get all levels not in node
       levels.missing <- setdiff(levels(x), levels.ordered)
       levels.ordered <- c(levels.missing, levels.ordered)
+    } else if (is.factor(response) & nlevels(response) > 2) {
+      ## Create contingency table of the nominal outcome with the nominal covariate
+      tab <- table(droplevels(response), droplevels(x))
+      
+      ## Compute correlation matrix of the contingency table (correlation of the covariate levels w.r.t outcome)
+      cr <- suppressWarnings(cor(tab))
+      cr[is.na(cr)] <- 0                      
+      diag(cr) <- NA
+      
+      ## Start with a random level and select as next level the level with highest correlation to the current level (excluding already selected levels)
+      num_levels <- nlevels(droplevels(x))
+      next_level <- sample(num_levels, 1)
+      res <- c(next_level, rep(NA, num_levels - 1))
+      for (i in 2:num_levels) {
+        cr[, next_level] <- NA
+        next_level <- which.max.random(cr[next_level, ])
+        res[i] <- next_level
+      }
+      levels.ordered <- as.character(levels(droplevels(x))[res])
     } else {
       ## Order factor levels by num.response
       means <- aggregate(num.response~x, FUN=mean)
