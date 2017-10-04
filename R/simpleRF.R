@@ -106,7 +106,8 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
   }
   else if (unordered_factors == "ignore") {
     ## Just set to ordered if "ignore"
-    model.data[, -1] <- lapply(model.data[, -1], as.ordered)
+    ordered.idx <- sapply(model.data[, -1], is.ordered)
+    model.data[, -1][, ordered.idx] <- lapply(model.data[, -1][, ordered.idx], as.ordered)
     
     ## Save levels
     covariate_levels <- lapply(model.data[, -1], levels)
