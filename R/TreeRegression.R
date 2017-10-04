@@ -78,7 +78,9 @@ TreeRegression <- setRefClass("TreeRegression",
               }
             }
           } else {
-            split_levels_left[[nodeID]] <<- list()
+            if (best_split$varID == split_varID) {
+              split_levels_left[[nodeID]] <<- list()
+            }
           }
           
         }
