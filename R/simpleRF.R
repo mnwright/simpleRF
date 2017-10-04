@@ -108,7 +108,7 @@ simpleRF <- function(formula, data, num_trees = 50, mtry = NULL,
     ## Just set to ordered if "ignore"
     character.idx <- sapply(model.data[, -1], is.character)
     ordered.idx <- sapply(model.data[, -1], is.ordered)
-    factor.idx <- sapply(model.data[, -1], factor.idx)
+    factor.idx <- sapply(model.data[, -1], is.factor)
     recode.idx <- character.idx | (factor.idx & !ordered.idx)
     model.data[, -1][, recode.idx] <- lapply(model.data[, -1][, recode.idx], as.ordered)
     
