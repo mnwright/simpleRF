@@ -116,3 +116,22 @@ reorder.factor.columns <- function(data) {
   ## Return data
   data
 }
+
+##' Convert number to bit vector.
+##' @title Number to bit vector
+##' @param x Input number.
+##' @param ength Length of output bit vector.
+##' @return Bit vector.
+##' @author Marvin N. Wright
+as.bitvect <- function(x, length = 32) {
+  i <- 1
+  string <- numeric(length)
+  while(x > 0) {
+    string[i] <- x %% 2
+    x <- x %/% 2
+    i <- i + 1 
+  }
+  as.logical(string)
+}
+
+

@@ -143,7 +143,7 @@ TreeClassification <- setRefClass("TreeClassification",
       num_partitions <- 2^(length(possible_split_values) - 1) - 1
       for (j in 1:num_partitions) {
         ## Convert number to logic vector
-        left_idx <- as.integer(intToBits(j))[1:length(possible_split_values)] == 1
+        left_idx <- as.bitvect(j, length = length(possible_split_values))
         values_left <- possible_split_values[left_idx]
         
         ## Count classes in childs
