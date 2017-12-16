@@ -105,8 +105,10 @@ reorder.factor.columns <- function(data) {
       levels.ordered <- cor.order(y = response, x = x)
     } else {
       ## Order factor levels by num.response
-      means <- aggregate(num.response~x, FUN=mean)
-      levels.ordered <- means$x[order(means$num.response)]
+      means <- sapply(levels(x), function(y) {
+        mean(num.response[x == y])
+      })
+      levels.ordered <- as.character(levels(x)[order(means)])
     }
     
     ## Return reordered factor

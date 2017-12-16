@@ -45,8 +45,10 @@ TreeClassification <- setRefClass("TreeClassification",
             levels.ordered <- cor.order(y = response, x = data_values)
           } else {
             num.response <- as.numeric(response)
-            means <- aggregate(num.response ~ data_values, FUN=mean)
-            levels.ordered <- as.character(means$data_values[order(means$num.response)])
+            means <- sapply(levels(data_values), function(x) {
+              mean(num.response[data_values == x])
+            })
+            levels.ordered <- as.character(levels(data_values)[order(means)])
           }
           
           ## Get all levels not in node
