@@ -105,7 +105,7 @@ TreeClassification <- setRefClass("TreeClassification",
     
     findBestSplitValueOrdered = function(split_varID, data_values, best_split, response) {
       ## For all possible splits
-      possible_split_values <- sort(unique(data_values))
+      possible_split_values <- unique(data_values)
       for (j in 1:length(possible_split_values)) {
         split_value <- possible_split_values[j]
         
@@ -128,9 +128,7 @@ TreeClassification <- setRefClass("TreeClassification",
         }
         
         ## Use this split if better than before
-        if (decrease > best_split$decrease | 
-            ## Use same split as in partition splitting (partition will start with alphabetically small factor to the left)
-            (decrease >= best_split$decrease & split_varID == best_split$varID & is.factor(split_value) & min(as.character(possible_split_values[(j+1):length(possible_split_values)])) < as.character(best_split$value))) {
+        if (decrease > best_split$decrease) {
           best_split$value <- split_value
           best_split$varID <- split_varID
           best_split$decrease <- decrease
