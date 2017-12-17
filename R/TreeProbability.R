@@ -42,8 +42,10 @@ TreeProbability <- setRefClass("TreeProbability",
         if (!is.numeric(data_values) & !is.ordered(data_values) & unordered_factors == "order_split") {
           ## Order factor levels
           num.response <- as.numeric(response)
-          means <- aggregate(num.response ~ data_values, FUN=mean)
-          levels.ordered <- as.character(means$data_values[order(means$num.response)])
+          means <- sapply(levels(data_values), function(x) {
+            mean(num.response[data_values == x])
+          })
+          levels.ordered <- as.character(levels(data_values)[order(means)])
           
           ## Get all levels not in node
           levels.missing <- setdiff(levels(data_values), levels.ordered)
