@@ -18,4 +18,3 @@ Compute median survival if available or largest quantile available in all strata
 \author{
 Marvin N. Wright
 }
-

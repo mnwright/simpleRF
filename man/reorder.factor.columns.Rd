@@ -18,4 +18,3 @@ Reorder factor columns. Use mean for continuous response, class counts for facto
 \author{
 Marvin N. Wright
 }
-

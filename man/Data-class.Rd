@@ -2,8 +2,8 @@
 % Please edit documentation in R/Data.R
 \docType{class}
 \name{Data-class}
-\alias{Data}
 \alias{Data-class}
+\alias{Data}
 \title{Data class}
 \description{
 Wrapper class for \code{data.frame}. 

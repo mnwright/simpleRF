@@ -58,10 +58,9 @@ table(iris_test$Species, pred_iris)
 }
 
 }
-\author{
-Marvin N. Wright
-}
 \references{
 Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \cr
 }
-
+\author{
+Marvin N. Wright
+}

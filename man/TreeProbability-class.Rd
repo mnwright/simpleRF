@@ -2,8 +2,8 @@
 % Please edit documentation in R/TreeProbability.R
 \docType{class}
 \name{TreeProbability-class}
-\alias{TreeProbability}
 \alias{TreeProbability-class}
+\alias{TreeProbability}
 \title{Probability tree class}
 \description{
 Subclass for probability tree.

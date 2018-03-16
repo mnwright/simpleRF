@@ -2,8 +2,8 @@
 % Please edit documentation in R/TreeRegression.R
 \docType{class}
 \name{TreeRegression-class}
-\alias{TreeRegression}
 \alias{TreeRegression-class}
+\alias{TreeRegression}
 \title{Regression tree class}
 \description{
 Subclass for regression tree.

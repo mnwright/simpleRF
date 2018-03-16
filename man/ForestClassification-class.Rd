@@ -2,8 +2,8 @@
 % Please edit documentation in R/ForestClassification.R
 \docType{class}
 \name{ForestClassification-class}
-\alias{ForestClassification}
 \alias{ForestClassification-class}
+\alias{ForestClassification}
 \title{Classification forest class}
 \description{
 Subclass for classification forest. 

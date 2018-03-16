@@ -20,4 +20,3 @@ Order factor levels with correlation approach
 \author{
 Marvin N. Wright
 }
-
