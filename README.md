@@ -9,7 +9,6 @@ For an runtime-optimized random forest implementation, see [ranger](https://gith
 ### TODO
 Features: 
 * Variable importance
-* Unordered factor splitting
 * Use a standard `predict()` function
 * ...
 
