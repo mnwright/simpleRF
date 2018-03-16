@@ -7,14 +7,14 @@ ForestRegression <- setRefClass("ForestRegression",
   fields = list(), 
   methods = list(
     
-    grow = function() {      
+    grow = function(num_threads) {      
       treetype <<- "Regression"
       
       ## Create trees
       trees <<- replicate(num_trees, TreeRegression$new())
 
       ## Call parent method
-      callSuper()
+      callSuper(num_threads)
     },
     
     predict = function(newdata) {

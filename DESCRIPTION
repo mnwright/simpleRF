@@ -1,8 +1,8 @@
 Package: simpleRF
 Type: Package
 Title: Random Forests with emphasis on simplicity
-Version: 0.1
-Date: 2015-01-16
+Version: 0.1.3
+Date: 2018-03-16
 Author: Marvin N. Wright
 Maintainer: Marvin N. Wright <marv@wrig.de>
 Description: Uses reference classes and only plain R. Not optimized for
@@ -11,4 +11,4 @@ License: GPL-3
 Imports:
     methods,
     ipred
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

@@ -2,8 +2,8 @@
 % Please edit documentation in R/Forest.R
 \docType{class}
 \name{Forest-class}
-\alias{Forest}
 \alias{Forest-class}
+\alias{Forest}
 \title{Forest class}
 \description{
 Virtual class for Random forest. 

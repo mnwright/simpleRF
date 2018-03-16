@@ -7,15 +7,17 @@ Tree <- setRefClass("Tree",
     mtry = "integer", 
     min_node_size = "integer",
     splitrule = "character",
+    unordered_factors = "character",
     data = "Data", 
     sampleIDs = "list",    
     oob_sampleIDs = "integer",
     child_nodeIDs = "list",      
     split_varIDs = "integer",    
-    split_values = "numeric"),  
+    split_values = "numeric", 
+    split_levels_left = "list"),  
   methods = list(
     
-    grow = function(replace) {      
+    grow = function(replace) {   
       ## Bootstrap 
       num_samples <- data$nrow
       if (replace) {
@@ -50,8 +52,14 @@ Tree <- setRefClass("Tree",
         right_child <- length(sampleIDs) + 2
         child_nodeIDs[[nodeID]] <<- c(left_child, right_child)
         
-        ## For each sample in node, assign to left (<= split val) or right (> split val) child
-        idx <- data$subset(sampleIDs[[nodeID]], split$varID) <= split$value
+        ## For each sample in node, assign to left or right child
+        if (length(split_levels_left[[nodeID]]) == 0) {
+          ## Ordered splitting
+          idx <- data$subset(sampleIDs[[nodeID]], split$varID) <= split$value
+        } else {
+          # Unordered splitting
+          idx <- data$subset(sampleIDs[[nodeID]], split$varID) %in% split_levels_left[[nodeID]]
+        }
         sampleIDs[[left_child]] <<- sampleIDs[[nodeID]][idx]
         sampleIDs[[right_child]] <<- sampleIDs[[nodeID]][!idx]                    
       
@@ -92,11 +100,24 @@ Tree <- setRefClass("Tree",
           }
           
           ## Move to child
-          if (predict_data$subset(i, split_varIDs[nodeID]) <= split_values[nodeID]) {
-            nodeID <- child_nodeIDs[[nodeID]][1];
+          if (length(split_levels_left[[nodeID]]) == 0) {
+            ## Ordered splitting
+            value <- as.numeric(predict_data$subset(i, split_varIDs[nodeID]))
+            if (value <= split_values[nodeID]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
           } else {
-            nodeID <- child_nodeIDs[[nodeID]][2];
+            ## Unordered splitting
+            value <- predict_data$subset(i, split_varIDs[nodeID])
+            if (value %in% split_levels_left[[nodeID]]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
           }
+          
         }
         
         ## Add to prediction
@@ -120,11 +141,24 @@ Tree <- setRefClass("Tree",
           }
           
           ## Move to child
-          if (data$subset(oob_sampleIDs[i], split_varIDs[nodeID]) <= split_values[nodeID]) {
-            nodeID <- child_nodeIDs[[nodeID]][1];
+          if (length(split_levels_left[[nodeID]]) == 0) {
+            ## Ordered splitting
+            value <- as.numeric(data$subset(oob_sampleIDs[i], split_varIDs[nodeID]))
+            if (value <= split_values[nodeID]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
           } else {
-            nodeID <- child_nodeIDs[[nodeID]][2];
+            ## Unordered splitting
+            value <- data$subset(oob_sampleIDs[i], split_varIDs[nodeID])
+            if (value %in% split_levels_left[[nodeID]]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
           }
+          
         }
         
         ## Add to prediction

@@ -18,4 +18,3 @@ Find index of maximum, breaking ties at random and ignoring NAs.
 \author{
 Marvin N. Wright
 }
-

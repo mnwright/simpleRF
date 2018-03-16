@@ -2,8 +2,8 @@
 % Please edit documentation in R/ForestRegression.R
 \docType{class}
 \name{ForestRegression-class}
-\alias{ForestRegression}
 \alias{ForestRegression-class}
+\alias{ForestRegression}
 \title{Regression forest class}
 \description{
 Subclass for regression forest. 

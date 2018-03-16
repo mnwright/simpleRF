@@ -2,8 +2,8 @@
 % Please edit documentation in R/ForestSurvival.R
 \docType{class}
 \name{ForestSurvival-class}
-\alias{ForestSurvival}
 \alias{ForestSurvival-class}
+\alias{ForestSurvival}
 \title{Survival forest class}
 \description{
 Subclass for survival forest. 

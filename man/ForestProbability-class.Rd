@@ -2,8 +2,8 @@
 % Please edit documentation in R/ForestProbability.R
 \docType{class}
 \name{ForestProbability-class}
-\alias{ForestProbability}
 \alias{ForestProbability-class}
+\alias{ForestProbability}
 \title{Probability forest class}
 \description{
 Subclass for probability forest. 

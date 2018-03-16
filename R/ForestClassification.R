@@ -8,14 +8,14 @@ ForestClassification <- setRefClass("ForestClassification",
     response_levels = "character"), 
   methods = list(
     
-    grow = function() {      
+    grow = function(num_threads) {      
       treetype <<- "Classification"
       
       ## Create trees
       trees <<- replicate(num_trees, TreeClassification$new())
       
       ## Call parent method
-      callSuper()
+      callSuper(num_threads)
     }, 
     
     predict = function(newdata) {
