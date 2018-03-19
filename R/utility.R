@@ -78,15 +78,21 @@ cor.order <- function(y, x) {
 ##' @author Marvin N. Wright
 ##' @references Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning Nominal Attributes in Decision Trees. Data Min Knowl Discov 3:197. \url{https://doi.org/10.1023/A:1009869804967}.
 pc.order <- function(y, x) {
+  if (nlevels(droplevels(x)) < 2) {
+    return(as.character(levels(droplevels(x))))
+  }
+  
   ## Create contingency table of the nominal outcome with the nominal covariate
-  N <- table(droplevels(y), droplevels(x))
+  N <- table(droplevels(x), droplevels(y))
 
-  ## PCA of class probabilites
+  ## PCA of weighted covariance matrix of class probabilites
   P <- N/rowSums(N)
-  pc1 <- prcomp(P, rank. = 1)$rotation
+  S <- cov.wt(P, wt = rowSums(N))$cov
+  pc1 <- prcomp(S, rank. = 1)$rotation
+  score <- P %*% pc1
   
   ## Return ordered factor levels
-  as.character(levels(droplevels(x))[order(pc1)])
+  as.character(levels(droplevels(x))[order(score)])
 }
 
 ##' Reorder factor columns. Use mean for continuous response, class counts for factors and mean survival for survival response.
