@@ -2,5 +2,7 @@
 
 export(simpleRF)
 import(methods)
+import(stats)
+importFrom(coin,logrank_trafo)
 importFrom(ipred,sbrier)
 importFrom(parallel,mclapply)
