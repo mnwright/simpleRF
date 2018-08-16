@@ -38,6 +38,7 @@
 ##' @author Marvin N. Wright
 ##' @references
 ##' Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \cr
+##' @import stats
 ##' @export
 simpleRF <- function(formula, data, num_trees = 50, mtry = NULL, 
                      min_node_size = NULL, replace = TRUE, probability = FALSE, 

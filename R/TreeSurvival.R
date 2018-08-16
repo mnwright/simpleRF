@@ -2,6 +2,7 @@
 ##' @title Survival tree class
 ##' @description Subclass for survival tree.
 ##' Contains all fields and methods used special for survival trees.
+##' @importFrom coin logrank_trafo
 TreeSurvival <- setRefClass("TreeSurvival", 
   contains = "Tree",
   fields = list(
@@ -56,8 +57,12 @@ TreeSurvival <- setRefClass("TreeSurvival",
         
         ## Handle ordered factors
         if (!is.numeric(data_values) & !is.ordered(data_values) & unordered_factors == "order_split") {
-          ## Use median survival if available or largest quantile available in all strata if median not available
-          levels.ordered <- largest.quantile(response ~ data_values)
+          ## Order factor levels
+          num.response <- coin::logrank_trafo(response, ties.method = "Hothorn-Lausen")
+          means <- sapply(levels(data_values), function(x) {
+            mean(num.response[data_values == x])
+          })
+          levels.ordered <- as.character(levels(data_values)[order(means)])
           
           ## Get all levels not in node
           levels.missing <- setdiff(levels(data_values), levels.ordered)

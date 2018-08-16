@@ -4,9 +4,9 @@
 \alias{simpleRF}
 \title{simpleRF}
 \usage{
-simpleRF(formula, data, num_trees = 50, mtry = NULL, min_node_size = NULL,
-  replace = TRUE, probability = FALSE, splitrule = NULL,
-  unordered_factors = "ignore", num_threads = 1)
+simpleRF(formula, data, num_trees = 50, mtry = NULL,
+  min_node_size = NULL, replace = TRUE, probability = FALSE,
+  splitrule = NULL, unordered_factors = "ignore", num_threads = 1)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit.}

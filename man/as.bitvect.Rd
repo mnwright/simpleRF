@@ -9,7 +9,7 @@ as.bitvect(x, length = 32)
 \arguments{
 \item{x}{Input number.}
 
-\item{ength}{Length of output bit vector.}
+\item{length}{Length of output bit vector.}
 }
 \value{
 Bit vector.

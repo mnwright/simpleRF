@@ -22,25 +22,6 @@ which.min.random <- function(x) {
   which(rank(x, ties.method = "random", na.last = TRUE) == 1)
 }
 
-##' Compute median survival if available or largest quantile available in all strata if median not available.
-##' @title Compute largest available quantile
-##' @param formula Formula for survival model.
-##' @return Ordered factor levels
-##' @author Marvin N. Wright
-largest.quantile <- function(formula) {
-  ## Fit survival model
-  fit <- survfit(formula)
-  smry <- summary(fit)
-  
-  ## Use median survival if available or largest quantile available in all strata if median not available
-  max_quant <- max(aggregate(smry$surv ~ smry$strata, FUN = min)[, "smry$surv"])
-  quantiles <- quantile(fit, conf.int = FALSE, prob = min(0.5, 1 - max_quant))[, 1]
-  names(quantiles) <- gsub(".+=", "", names(quantiles))
-  
-  ## Return ordered levels
-  names(sort(quantiles))
-}
-
 ##' Order factor levels with correlation approach
 ##' @title Order factor levels with correlation approach
 ##' @param y Response factor.
@@ -99,6 +80,7 @@ pc.order <- function(y, x) {
 ##' @title Reorder factor columns
 ##' @param data Data with factor columns.
 ##' @return Data with reordered factor columns.
+##' @importFrom coin logrank_trafo
 ##' @author Marvin N. Wright
 reorder.factor.columns <- function(data) {
   ## Recode characters and unordered factors
@@ -112,21 +94,14 @@ reorder.factor.columns <- function(data) {
   if (is.factor(response)) {
     num.response <- as.numeric(response)
   } else if ("Surv" %in% class(response)) {
-    num.response <- response[, 1]
+    num.response <- coin::logrank_trafo(response, ties.method = "Hothorn-Lausen")
   } else {
     num.response <- response
   }
   
   ## Recode each column
   data[, -1][, recode.idx] <- lapply(data[, -1][, recode.idx, drop = FALSE], function(x) {
-    if ("Surv" %in% class(response)) {
-      ## Use median survival if available or largest quantile available in all strata if median not available
-      levels.ordered <- largest.quantile(response ~ x)
-      
-      ## Get all levels not in node
-      levels.missing <- setdiff(levels(x), levels.ordered)
-      levels.ordered <- c(levels.missing, levels.ordered)
-    } else if (is.factor(response) & nlevels(response) > 2) {
+    if (is.factor(response) & nlevels(response) > 2) {
       levels.ordered <- pc.order(y = response, x = x)
     } else {
       ## Order factor levels by num.response
@@ -147,7 +122,7 @@ reorder.factor.columns <- function(data) {
 ##' Convert number to bit vector.
 ##' @title Number to bit vector
 ##' @param x Input number.
-##' @param ength Length of output bit vector.
+##' @param length Length of output bit vector.
 ##' @return Bit vector.
 ##' @author Marvin N. Wright
 as.bitvect <- function(x, length = 32) {
