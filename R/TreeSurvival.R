@@ -122,21 +122,21 @@ TreeSurvival <- setRefClass("TreeSurvival",
       possible_split_values <- unique(data_values)
       for (j in 1:length(possible_split_values)) {
         split_value <- possible_split_values[j]
-        
-        ## Count classes in childs
         idx <- data_values <= split_value
-        class_counts_left <- tabulate(response[idx])
-        class_counts_right <- tabulate(response[!idx])
         
         ## Skip if one child empty
-        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+        if (sum(idx) == 0 | sum(!idx) == 0) {
           next
         }
         
         ## Compute test statistic depending on splitrule
         if (splitrule == "Logrank") {
-          ## Compute logrank test
-          teststat <- survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq
+          ## Compute logrank test (skip split point on error)
+          teststat <- tryCatch(survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq, 
+                   error = function(e) e)
+          if (inherits(teststat, "error")) {
+            next
+          }
         } else if (splitrule == "mean") {
           time <- response[, 1]
           time_child1 <- time[idx]
@@ -171,14 +171,10 @@ TreeSurvival <- setRefClass("TreeSurvival",
         ## Convert number to logic vector
         left_idx <- as.bitvect(j, length = length(possible_split_values))
         values_left <- possible_split_values[left_idx]
-        
-        ## Count classes in childs
         idx <- data_values %in% values_left
-        class_counts_left <- tabulate(response[idx])
-        class_counts_right <- tabulate(response[!idx])
         
         ## Skip if one child empty
-        if (sum(class_counts_left) == 0 | sum(class_counts_right) == 0) {
+        if (sum(idx) == 0 | sum(!idx) == 0) {
           next
         }
         
