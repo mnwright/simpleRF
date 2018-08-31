@@ -180,8 +180,12 @@ TreeSurvival <- setRefClass("TreeSurvival",
         
         ## Compute test statistic depending on splitrule
         if (splitrule == "Logrank") {
-          ## Compute logrank test
-          teststat <- survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq
+          ## Compute logrank test (skip split point on error)
+          teststat <- tryCatch(survdiff(Surv(response[, 1], response[, 2]) ~ idx)$chisq, 
+                               error = function(e) e)
+          if (inherits(teststat, "error")) {
+            next
+          }
         } else if (splitrule == "mean") {
           time <- response[, 1]
           time_child1 <- time[idx]
