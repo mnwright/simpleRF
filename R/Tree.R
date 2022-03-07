@@ -165,5 +165,79 @@ Tree <- setRefClass("Tree",
         predictions[[i]] <- getNodePrediction(nodeID)
       }
       return(simplify2array(predictions))
-    })
+    }, 
+    
+    predictionError = function(pred = NULL) {
+      ## Empty virtual function
+    },
+    
+    permuteAndPredictOOB = function(permuted_varID) {
+      ## Initialize
+      num_samples_predict <- length(oob_sampleIDs)
+      predictions <- list()
+      permutations <- sample(num_samples_predict)
+      
+      ## For each sample start in root and drop down tree
+      for (i in 1:num_samples_predict) {
+        nodeID <- 1
+        while(TRUE) {
+          ## Break if terminal node
+          if (nodeID > length(child_nodeIDs) || is.null(child_nodeIDs[[nodeID]])) {
+            break
+          }
+          
+          ## Move to child
+          if (length(split_levels_left[[nodeID]]) == 0) {
+            ## Ordered splitting
+            if (split_varIDs[nodeID] == permuted_varID) {
+              value <- as.numeric(data$subset(oob_sampleIDs[permutations[i]], split_varIDs[nodeID]))
+            } else {
+              value <- as.numeric(data$subset(oob_sampleIDs[i], split_varIDs[nodeID])) 
+            }
+            if (value <= split_values[nodeID]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
+          } else {
+            ## Unordered splitting
+            if (split_varIDs[nodeID] == permuted_varID) {
+              value <- data$subset(oob_sampleIDs[permutations[i]], split_varIDs[nodeID])
+            } else {
+              value <- data$subset(oob_sampleIDs[i], split_varIDs[nodeID])
+            }
+            if (value %in% split_levels_left[[nodeID]]) {
+              nodeID <- child_nodeIDs[[nodeID]][1]
+            } else {
+              nodeID <- child_nodeIDs[[nodeID]][2]
+            }
+          }
+          
+        }
+        
+        ## Add to prediction
+        predictions[[i]] <- getNodePrediction(nodeID)
+      }
+      return(simplify2array(predictions))
+    }, 
+    
+    variableImportance = function(type = "permutation") {
+      if (type == "permutation") {
+        # Prediction error without any permutation
+        oob_error <- predictionError()
+        
+        # For each variable, prediction error after permutation
+        res <- sapply(2:data$ncol, function(varID) {
+          pred <- permuteAndPredictOOB(varID)
+          oob_error_perm <- predictionError(pred)
+          oob_error_perm - oob_error
+        })
+        names(res) <- data$names[-1]
+        res
+      } else {
+        stop("Only permutation variable importance implemented.")
+      }
+    }
+    
+    )
 )

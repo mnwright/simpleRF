@@ -8,7 +8,6 @@ For a runtime-optimized random forest implementation, see [ranger](https://githu
 
 ### TODO
 Features: 
-* Variable importance
 * Use a standard `predict()` function
 * ...
 

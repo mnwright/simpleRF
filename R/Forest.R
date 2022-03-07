@@ -73,6 +73,16 @@ Forest <- setRefClass("Forest",
       ## Empty virtual function
     },
     
+    variableImportance = function(type = "permutation", num_threads = 1) {
+      ## Calculate tree VIM
+      vim_trees <- mclapply(trees, function(x) {
+        x$variableImportance(type)
+      }, mc.cores = num_threads)
+      
+      ## Aggregate over trees
+      rowMeans(simplify2array(vim_trees))
+    },
+    
     show = function() {
       cat("simpleRF Forest\n")
       cat("Type:                            ", treetype, "\n")

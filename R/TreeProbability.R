@@ -181,5 +181,21 @@ TreeProbability <- setRefClass("TreeProbability",
       ## Return class fractions
       node_samples <- sampleIDs[[nodeID]]
       table(data$subset(node_samples, 1))/length(node_samples)
+    }, 
+    
+    predictionError = function(pred = NULL) {
+      if (is.null(pred)) {
+        pred <- predictOOB()
+      }
+
+      ## Get probabilities for true classes
+      response <- as.numeric(data$subset(oob_sampleIDs, 1))
+      num_samples <- nrow(probabilities)
+      num_classes <- ncol(probabilities)
+      idx <- response == matrix(1:num_classes, byrow = TRUE, 
+                                nrow = num_samples, ncol = num_classes)
+      true_class_probabilities <- probabilities[idx]
+      
+      sum((true_class_probabilities - 1)^2, na.rm = TRUE) / length(oob_sampleIDs)
     })
 )

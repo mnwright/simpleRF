@@ -180,6 +180,13 @@ TreeRegression <- setRefClass("TreeRegression",
     
     getNodePrediction = function(nodeID) {
       return(split_values[nodeID])
+    }, 
+    
+    predictionError = function(pred = NULL) {
+      if (is.null(pred)) {
+        pred <- predictOOB()
+      }
+      sum((pred - data$subset(oob_sampleIDs, 1))^2, na.rm = TRUE) / length(oob_sampleIDs)
     })
     
 )

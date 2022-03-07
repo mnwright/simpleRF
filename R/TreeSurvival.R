@@ -233,5 +233,16 @@ TreeSurvival <- setRefClass("TreeSurvival",
         } 
         survival[[nodeID]][i] <<- surv_value
       }  
+    }, 
+    
+    predictionError = function(pred = NULL) {
+      if (is.null(pred)) {
+        pred <- predictOOB()
+      }
+      sum(pred != as.numeric(data$subset(oob_sampleIDs, 1)), na.rm = TRUE) / data$nrow
+      
+      ## Return brier score for OOB predictions
+      bs <- ipred::sbrier(data$subset(oob_sampleIDs, 1), t(pred), timepoints)
+      bs[1]
     })
 )
